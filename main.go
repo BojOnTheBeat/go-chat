@@ -29,11 +29,11 @@ func main() {
 	http.Handle("/", &templateHandler{filename: "chat.html"})
 	// we use an initialized type struct here instead of a func (note Handle vs HandleFunc)
 	// and we can do this only because our type templateHandler implements
-	// the serveHTTP method that all Handlers need
+	// the serveHTTP method that all Handler interfaces need
 
 	http.Handle("/room", r)
 
-	// start the room
+	// start the room in a separate goroutine so this one can run the webserver
 	go r.run()
 
 	// start the webserver
