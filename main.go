@@ -25,20 +25,15 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`
-			<html>
-				<head>
-					<title> Chat </title>
-				</head>
-				<body>
-					Let's Chat!
-				</body>
-			</html>`))
-	})
+	// root
+	http.Handle("/", &templateHandler{filename: "chat.html"})
+	// we use an initialized type struct here instead of a func (note Handle vs HandleFunc)
+	// and we can do this only because our type templateHandler implements
+	// the serveHTTP method that all Handlers need
 
-	// start the web server
+	// start the webserver
 	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatal("ListenAndServe:", err)
+		log.Fatal("ListenAndServe", err)
 	}
+
 }
