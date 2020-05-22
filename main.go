@@ -25,11 +25,16 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// root
+	r := newRoom()
 	http.Handle("/", &templateHandler{filename: "chat.html"})
 	// we use an initialized type struct here instead of a func (note Handle vs HandleFunc)
 	// and we can do this only because our type templateHandler implements
 	// the serveHTTP method that all Handlers need
+
+	http.Handle("/room", r)
+
+	// start the room
+	go r.run()
 
 	// start the webserver
 	if err := http.ListenAndServe(":8080", nil); err != nil {
