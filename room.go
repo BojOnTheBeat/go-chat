@@ -53,8 +53,13 @@ const (
 	messageBufferSize = 256
 )
 
+// In order to use web sockets, we must upgrade the HTTP connection using the Upgrader type,
+// which is reusable so we only create one.
+// THen when a request comes in via the serveHTTP method, we get the socket by calling
+// upgrade.Upgrade below
 var upgrader = &websocket.Upgrader{ReadBufferSize: socketBufferSize, WriteBufferSize: socketBufferSize}
 
+// this creates a web socket, initializes a client and has that client join the room.
 func (r *room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	socket, err := upgrader.Upgrade(w, req, nil)
 
@@ -71,7 +76,17 @@ func (r *room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	r.join <- client
 	defer func() { r.leave <- client }()
-	go client.write()
+	go client.write() // run in a different thread/goroutine
 	client.read()
 
+}
+
+// newRoom makes a new room.
+func newRoom() *room {
+	return &room{
+		forward: make(chan []byte),
+		join:    make(chan *client),
+		leave:   make(chan *client),
+		clients: make(map[*client]bool),
+	}
 }
