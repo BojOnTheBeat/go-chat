@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/bojonthebeat/go-trace"
 	"github.com/gorilla/websocket"
 )
 
@@ -25,6 +27,10 @@ type room struct {
 	// we have two (join and leave) channels to allow us safely add and remove clients
 	// from the clients map. We don't want two goroutines to allow us modify
 	// the map at the same time
+
+	// tracer will receive trace information of activity in
+	// the room
+	tracer trace.Tracer
 }
 
 func (r *room) run() {
@@ -33,16 +39,21 @@ func (r *room) run() {
 		case client := <-r.join:
 			// joining
 			r.clients[client] = true
+			r.tracer.Trace("New Client joined")
 
 		case client := <-r.leave:
 			// leaving
 			delete(r.clients, client)
 			close(client.send)
+			r.tracer.Trace("Client left")
+			r.tracer.Trace(fmt.Sprintf("%d clients remaining", len(r.clients)))
 
 		case msg := <-r.forward:
+			r.tracer.Trace("Message received: ", string(msg))
 			// forward message to all clients
 			for client := range r.clients {
 				client.send <- msg
+				r.tracer.Trace(" -- sent to client")
 			}
 		}
 	}

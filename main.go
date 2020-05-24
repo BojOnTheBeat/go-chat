@@ -4,9 +4,12 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sync"
 	"text/template"
+
+	"github.com/bojonthebeat/go-trace"
 )
 
 var templatesFolder = "templates"
@@ -26,10 +29,10 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
 	var addr = flag.String("addr", ":8080", "The addr of the application")
 	flag.Parse()
 	r := newRoom()
+	r.tracer = trace.New(os.Stdout)
 	http.Handle("/", &templateHandler{filename: "chat.html"})
 	// we use an initialized type struct here instead of a func (note Handle vs HandleFunc)
 	// and we can do this only because our type templateHandler implements
