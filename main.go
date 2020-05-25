@@ -33,11 +33,9 @@ func main() {
 	flag.Parse()
 	r := newRoom()
 	r.tracer = trace.New(os.Stdout)
-	http.Handle("/", &templateHandler{filename: "chat.html"})
-	// we use an initialized type struct here instead of a func (note Handle vs HandleFunc)
-	// and we can do this only because our type templateHandler implements
-	// the serveHTTP method that all Handler interfaces need
 
+	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
+	http.Handle("/login", &templateHandler{filename: "login.html"})
 	http.Handle("/room", r)
 
 	// start the room in a separate goroutine so this one can run the webserver
