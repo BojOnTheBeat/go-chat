@@ -55,6 +55,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("TODO handle login for", provider)
 	default:
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintf(w, "Auth cation %s not supported", action)
+		fmt.Fprintf(w, "Auth action %s not supported", action)
 	}
 }
